@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Oculus.Haptics;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.XR.OpenXR.Input;
 
 public class Bow : MonoBehaviour
 {
@@ -19,6 +21,13 @@ public class Bow : MonoBehaviour
     private float m_PullValue = 0.0f;
 
     public float pullMultiplier = 1;
+
+    [Header("Haptics")]
+    public HapticClipPlayer hapticsClipPlayer;
+
+    [Header("Audio")]
+    public AudioClip bowReleaseSound;
+    private AudioSource m_bowAudioSource;
 
     private void Awake()
     {
@@ -79,8 +88,9 @@ public class Bow : MonoBehaviour
         // Simple distance check 
         float distance = Vector3.Distance(hand.position, m_Start.position);
 
-        if (distance > m_GrabThreshold)
+        if (distance > m_GrabThreshold) {
             return;
+        }
 
         // Set
         m_PullingHand = hand;
@@ -89,8 +99,9 @@ public class Bow : MonoBehaviour
     public void Release()
     {
         // If we've pulled far enough, fire
-        if (m_PullValue > 0.25f)
+        if (m_PullValue > 0.25f) {
             FireArrow();
+        }
 
         // Clear
         m_PullingHand = null;
@@ -100,13 +111,32 @@ public class Bow : MonoBehaviour
         m_Animator.SetFloat("Blend", 0);
 
         // Create new arrow, with delay
-        if (!m_CurrentArrow)
+        if (!m_CurrentArrow) {
             StartCoroutine(CreateArrow(0.25f));
+        }
+        
     }
 
     private void FireArrow()
     {
         m_CurrentArrow.Fire(m_PullValue * pullMultiplier);
         m_CurrentArrow = null;
+        PlayHapticFeedback();
     }
-}
+
+
+
+    private void PlayHapticFeedback() {
+        if (m_PullingHand != null) {
+            HapticSource hapticsSource = m_PullingHand.GetComponent<HapticSource>();
+
+            if (hapticsSource != null) {
+                hapticsSource.Play();
+            }
+
+            if (m_bowAudioSource != null && bowReleaseSound != null) {
+                m_bowAudioSource.PlayOneShot(bowReleaseSound);
+            }
+        }
+    }
+ }
