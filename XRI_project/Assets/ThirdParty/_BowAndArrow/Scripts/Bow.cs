@@ -3,8 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Input;
 
-public class Bow : MonoBehaviour
-{
+public class Bow : MonoBehaviour {
     [Header("Assets")]
     public GameObject m_ArrowPrefab = null;
 
@@ -29,18 +28,15 @@ public class Bow : MonoBehaviour
     public AudioClip bowReleaseSound;
     private AudioSource m_bowAudioSource;
 
-    private void Awake()
-    {
+    private void Awake() {
         m_Animator = GetComponent<Animator>();
     }
 
-    private void Start()
-    {
+    private void Start() {
         StartCoroutine(CreateArrow(0.0f));
     }
 
-    private IEnumerator CreateArrow(float waitTime)
-    {
+    private IEnumerator CreateArrow(float waitTime) {
         // Wait
         yield return new WaitForSeconds(waitTime);
 
@@ -55,8 +51,7 @@ public class Bow : MonoBehaviour
         m_CurrentArrow = arrowObject.GetComponent<Arrow>();
     }
 
-    private void Update()
-    {
+    private void Update() {
         // Only update if pulling, and we have an arrow
         if (!m_PullingHand || !m_CurrentArrow)
             return;
@@ -69,8 +64,7 @@ public class Bow : MonoBehaviour
         m_Animator.SetFloat("Blend", m_PullValue);
     }
 
-    private float CalculatePull(Transform pullHand)
-    {
+    private float CalculatePull(Transform pullHand) {
         // Direction, and size
         Vector3 direction = m_End.position - m_Start.position;
         float magnitude = direction.magnitude;
@@ -83,8 +77,7 @@ public class Bow : MonoBehaviour
         return Vector3.Dot(difference, direction) / magnitude;
     }
 
-    public void Pull(Transform hand)
-    {
+    public void Pull(Transform hand) {
         // Simple distance check 
         float distance = Vector3.Distance(hand.position, m_Start.position);
 
@@ -96,8 +89,7 @@ public class Bow : MonoBehaviour
         m_PullingHand = hand;
     }
 
-    public void Release()
-    {
+    public void Release() {
         // If we've pulled far enough, fire
         if (m_PullValue > 0.25f) {
             FireArrow();
@@ -114,11 +106,10 @@ public class Bow : MonoBehaviour
         if (!m_CurrentArrow) {
             StartCoroutine(CreateArrow(0.25f));
         }
-        
+
     }
 
-    private void FireArrow()
-    {
+    private void FireArrow() {
         m_CurrentArrow.Fire(m_PullValue * pullMultiplier);
         m_CurrentArrow = null;
         PlayHapticFeedback();
@@ -139,4 +130,4 @@ public class Bow : MonoBehaviour
             }
         }
     }
- }
+}
